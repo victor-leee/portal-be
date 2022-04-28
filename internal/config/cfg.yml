@@ -1,0 +1,5 @@
+mysql_cfg:
+  host: mysql
+  port: 3306
+  username: root
+  password: hihi
