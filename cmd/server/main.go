@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+	logrus.Info("starting service")
 	r := gin.Default()
 	r.POST("/create-service", handler.CreateService)
 	logrus.Fatal(r.Run())
