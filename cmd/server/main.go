@@ -4,6 +4,7 @@ import (
 	errors2 "errors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/victor-leee/portal-be/internal/config"
 	"github.com/victor-leee/portal-be/internal/errors"
 	"github.com/victor-leee/portal-be/internal/handler"
 	"github.com/victor-leee/portal-be/internal/model"
@@ -18,6 +19,11 @@ type ResponseMessage struct {
 }
 
 func main() {
+	cfg, err := config.Init()
+	if err != nil {
+		panic(err)
+	}
+	model.MustInit(cfg)
 	logrus.Info("starting service")
 	r := gin.Default()
 	h := handler.GinHandler{
@@ -27,7 +33,7 @@ func main() {
 	}
 	r.POST("/create-service", wrapperHandler(h.CreateService))
 	r.POST("/query-by-parent-id", wrapperHandler(h.QueryByParentID))
-	logrus.Fatal(r.Run())
+	logrus.Fatal(r.Run(":80"))
 }
 
 func wrapperHandler(f CustomHandler) gin.HandlerFunc {

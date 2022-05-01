@@ -8,7 +8,11 @@ type RPCService struct {
 	ServiceKey         string `json:"serviceKey" gorm:"column:service_key"`
 	IsService          bool   `json:"isService" gorm:"column:is_service"`
 	ParentID           uint64 `json:"parentID" gorm:"column:parent_id"`
-	UniqueCompletePath string `json:"completePath" gorm:"complete_path"`
+	UniqueCompletePath string `json:"completePath" gorm:"column:complete_path"`
+}
+
+func (m *RPCService) TableName() string {
+	return "rpc_service_tab"
 }
 
 type RPCServiceDao interface {
@@ -24,7 +28,7 @@ func (R *RPCServiceDaoImpl) QueryByParentID(ctx context.Context, parentID uint64
 	queryMap := map[string]interface{}{
 		"parent_id": parentID,
 	}
-	if err := GetMysql(ctx).Model(&RPCService{}).Find(&services).Where(queryMap).Error; err != nil {
+	if err := GetMysql(ctx).Model(&RPCService{}).Where(queryMap).Find(&services).Error; err != nil {
 		return nil, err
 	}
 

@@ -18,7 +18,7 @@ type Config struct {
 
 func Init() (*Config, error) {
 	cfg := &Config{}
-	file, err := os.Open("cfg.yml")
+	file, err := os.Open("internal/config/cfg.yml")
 	if err != nil {
 		return nil, err
 	}

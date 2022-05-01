@@ -1,12 +1,12 @@
 package handler
 
 type CreateServiceRequest struct {
-	Name      string   `json:"name" binding:"required"`
-	Hierarchy []string `json:"hierarchy" binding:"required"`
-	ParentID  uint64   `json:"parentID" binding:"required"`
-	IsService bool     `json:"isService" binding:"required"`
+	Name      string   `json:"name"`
+	Hierarchy []string `json:"hierarchy"`
+	ParentID  uint64   `json:"parentID"`
+	IsService bool     `json:"isService"`
 }
 
 type QueryByParentIDRequest struct {
-	ParentID uint64 `json:"parentID" binding:"required"`
+	ParentID uint64 `json:"parentID"`
 }
