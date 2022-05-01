@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"github.com/victor-leee/portal-be/internal/cluster"
 	"github.com/victor-leee/portal-be/internal/config"
 	"github.com/victor-leee/portal-be/internal/model"
 	"strconv"
@@ -31,7 +32,22 @@ func (d *DefaultRPCServiceProcessor) Create(ctx context.Context, name string, hi
 		ServiceKey:         buildServiceKey(completePath),
 	}
 
-	return d.ServiceDao.Insert(ctx, serviceModel)
+	if err := d.ServiceDao.Insert(ctx, serviceModel); err != nil {
+		return err
+	}
+	if err := d.createInternalServiceRecord(ctx, serviceModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DefaultRPCServiceProcessor) createInternalServiceRecord(ctx context.Context, serviceModel *model.RPCService) error {
+	if !serviceModel.IsService {
+		return nil
+	}
+
+	return cluster.GetManager(cluster.K8S).CreateServiceInternalRecord(ctx, serviceModel)
 }
 
 func buildCompletePath(hierarchyInfo []string, service string) string {
