@@ -12,7 +12,7 @@ type RPCService struct {
 }
 
 func (m *RPCService) TableName() string {
-	return "rpc_service_tab"
+	return "service_tab"
 }
 
 type RPCServiceDao interface {
