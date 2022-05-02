@@ -1,4 +1,4 @@
-package errors
+package response_error
 
 import "strings"
 
