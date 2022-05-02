@@ -12,8 +12,13 @@ type Mysql struct {
 	Password string `yaml:"password"`
 }
 
+type Kubernetes struct {
+	RegistryIP string
+}
+
 type Config struct {
 	MysqlCfg *Mysql `yaml:"mysql_cfg"`
+	K8SCfg   *Kubernetes
 }
 
 func Init() (*Config, error) {
@@ -25,6 +30,16 @@ func Init() (*Config, error) {
 	if err = yaml.NewDecoder(file).Decode(cfg); err != nil {
 		return nil, err
 	}
+	initFromEnv(cfg)
 
 	return cfg, nil
+}
+
+func initFromEnv(config *Config) {
+	if config.K8SCfg == nil {
+		config.K8SCfg = &Kubernetes{}
+	}
+	if registryIP, ok := os.LookupEnv(EnvKubernetesRegistryIPKey); ok {
+		config.K8SCfg.RegistryIP = registryIP
+	}
 }

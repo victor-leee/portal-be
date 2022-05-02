@@ -13,23 +13,40 @@ import (
 	"time"
 )
 
+type CreateRPCServiceContext struct {
+	context.Context
+	Name             string
+	HierarchyInfo    []string
+	ParentID         uint64
+	IsService        bool
+	GitRepoURL       string
+	BuildFileRelPath string
+}
+
 type RPCServiceProcessor interface {
-	Create(ctx context.Context, name string, hierarchyInfo []string, parentID uint64, isService bool) error
-	Query(ctx context.Context, parentID uint64) ([]*model.RPCService, error)
+	Create(serviceContext *CreateRPCServiceContext) error
+	QueryByParentID(ctx context.Context, parentID uint64) ([]*model.RPCService, error)
+	QueryByID(ctx context.Context, ID uint64) (*model.RPCService, error)
 }
 
 type DefaultRPCServiceProcessor struct {
 	ServiceDao model.RPCServiceDao
 }
 
-func (d *DefaultRPCServiceProcessor) Create(ctx context.Context, name string, hierarchyInfo []string, parentID uint64, isService bool) error {
-	completePath := buildCompletePath(hierarchyInfo, name)
+func (d *DefaultRPCServiceProcessor) QueryByID(ctx context.Context, ID uint64) (*model.RPCService, error) {
+	return d.ServiceDao.QueryByID(ctx, ID)
+}
+
+func (d *DefaultRPCServiceProcessor) Create(ctx *CreateRPCServiceContext) error {
+	completePath := buildCompletePath(ctx.HierarchyInfo, ctx.Name)
 	serviceModel := &model.RPCService{
-		Name:               name,
-		IsService:          isService,
-		ParentID:           parentID,
+		Name:               ctx.Name,
+		IsService:          ctx.IsService,
+		ParentID:           ctx.ParentID,
 		UniqueCompletePath: completePath,
 		ServiceKey:         buildServiceKey(completePath),
+		GitRepo:            ctx.GitRepoURL,
+		BuildFileRelPath:   ctx.BuildFileRelPath,
 	}
 
 	if err := d.ServiceDao.Insert(ctx, serviceModel); err != nil {
@@ -47,7 +64,7 @@ func (d *DefaultRPCServiceProcessor) createInternalServiceRecord(ctx context.Con
 		return nil
 	}
 
-	return cluster.GetManager(cluster.K8S).CreateServiceInternalRecord(ctx, serviceModel)
+	return cluster.GetManager(cluster.K8S).ApplyServiceInternalDNSRecord(ctx, serviceModel)
 }
 
 func buildCompletePath(hierarchyInfo []string, service string) string {
@@ -78,6 +95,6 @@ func buildServiceKey(completePath string) string {
 	return base64.StdEncoding.EncodeToString(s.Sum(nil))
 }
 
-func (d *DefaultRPCServiceProcessor) Query(ctx context.Context, parentID uint64) ([]*model.RPCService, error) {
+func (d *DefaultRPCServiceProcessor) QueryByParentID(ctx context.Context, parentID uint64) ([]*model.RPCService, error) {
 	return d.ServiceDao.QueryByParentID(ctx, parentID)
 }

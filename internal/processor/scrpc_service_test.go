@@ -6,6 +6,6 @@ import (
 )
 
 func Test_BuildServiceKey(t *testing.T) {
-	completePath := "police-github-com"
+	completePath := "police-repo-com"
 	fmt.Printf("%s", buildServiceKey(completePath))
 }
