@@ -30,6 +30,11 @@ const (
 	APIRetrieveBranches = "https://api.github.com/repos/%s/%s/branches"
 )
 
+const (
+	AppTypeSCRPC = "sc_rpc"
+	AppTypeHTTP  = "http"
+)
+
 var (
 	ServiceKeyMaxRandomNumber = big.NewInt(666666)
 )
