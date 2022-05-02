@@ -20,6 +20,7 @@ type ListBranchesRequest struct {
 type RunPipelineRequest struct {
 	ID           uint64 `json:"id"`
 	RemoteBranch string `json:"remoteBranch"`
+	Replicas     int32  `json:"replicas"`
 }
 
 type RunPipelineResponse struct {

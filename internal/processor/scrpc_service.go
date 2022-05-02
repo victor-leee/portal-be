@@ -64,7 +64,7 @@ func (d *DefaultRPCServiceProcessor) createInternalServiceRecord(ctx context.Con
 		return nil
 	}
 
-	return cluster.GetManager(cluster.K8S).CreateServiceInternalRecord(ctx, serviceModel)
+	return cluster.GetManager(cluster.K8S).ApplyServiceInternalDNSRecord(ctx, serviceModel)
 }
 
 func buildCompletePath(hierarchyInfo []string, service string) string {

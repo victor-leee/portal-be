@@ -6,10 +6,20 @@ import (
 	"sync"
 )
 
+// TODO support self-defined port
+
+type DeploymentConfig struct {
+	ImageTag string
+	Service  *model.RPCService
+	Replicas int32
+}
+
 type Manager interface {
-	// CreateServiceInternalRecord adds a cname record to DNS center in the cluster
+	// ApplyServiceInternalDNSRecord adds a cname record to DNS center in the cluster
 	// it only functions within the cluster and therefore cannot be accessed externally
-	CreateServiceInternalRecord(ctx context.Context, service *model.RPCService) error
+	ApplyServiceInternalDNSRecord(ctx context.Context, service *model.RPCService) error
+	// ApplyServiceDeployment deploys the image with cfg
+	ApplyServiceDeployment(ctx context.Context, cfg *DeploymentConfig) error
 }
 
 type ManagerType uint8

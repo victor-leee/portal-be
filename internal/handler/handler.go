@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/victor-leee/portal-be/internal/cluster"
 	"github.com/victor-leee/portal-be/internal/image"
 	"github.com/victor-leee/portal-be/internal/processor"
 	"github.com/victor-leee/portal-be/internal/repo"
@@ -79,5 +80,17 @@ func (h *GinHandler) RunPipeLine(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 	// ----- send to docker daemon to build image
-	return h.BuildProcessor.BuildAndPush(baseDir, s.BuildFileRelPath)
+	tag, err := h.BuildProcessor.BuildAndPush(baseDir, s.BuildFileRelPath)
+	if err != nil {
+		return nil, err
+	}
+	if tag == nil {
+		return nil, errors.New("empty tag")
+	}
+	// ----- call k8s apiserver to deploy the image
+	return nil, cluster.GetManager(cluster.K8S).ApplyServiceDeployment(context.Background(), &cluster.DeploymentConfig{
+		Service:  s,
+		Replicas: req.Replicas,
+		ImageTag: *tag,
+	})
 }

@@ -9,8 +9,8 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
-	"github.com/sirupsen/logrus"
 	"github.com/victor-leee/portal-be/internal/config"
+	"google.golang.org/protobuf/proto"
 	"strings"
 	"time"
 )
@@ -26,13 +26,13 @@ func MustInitBuildCfg(cfg *config.Config) {
 }
 
 type Processor interface {
-	BuildAndPush(base, buildFile string) (interface{}, error)
+	BuildAndPush(base, buildFile string) (*string, error)
 }
 
 type Docker struct {
 }
 
-func (d *Docker) BuildAndPush(base, buildFile string) (interface{}, error) {
+func (d *Docker) BuildAndPush(base, buildFile string) (*string, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, err
@@ -53,18 +53,16 @@ func (d *Docker) BuildAndPush(base, buildFile string) (interface{}, error) {
 	}
 	defer imageBuildResponse.Body.Close()
 
-	res := ""
+	// TODO visualize the progress
 	scanner := bufio.NewScanner(imageBuildResponse.Body)
 	for scanner.Scan() {
-		res += scanner.Text()
-		logrus.Infof("res:%s", res)
+		scanner.Text()
 	}
 
-	return res, d.push(context.Background(), cli, randomTag)
+	return proto.String(randomTag), d.push(context.Background(), cli, randomTag)
 }
 
 func (d *Docker) push(ctx context.Context, cli *client.Client, tag string) error {
-	logrus.Info("enter push")
 	rd, err := cli.ImagePush(ctx, tag, types.ImagePushOptions{
 		RegistryAuth: authCfgBase64Encoded,
 	})
