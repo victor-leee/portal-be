@@ -66,6 +66,7 @@ func (k *k8sClusterManager) ApplyServiceDeployment(ctx context.Context, cfg *Dep
 										ContainerPort: proto.Int32(config.GlobalDefaultPort),
 									},
 								},
+								ImagePullPolicy: (*v14.PullPolicy)(proto.String(string(v14.PullNever))),
 							},
 						},
 					},

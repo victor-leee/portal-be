@@ -23,6 +23,6 @@ type RunPipelineRequest struct {
 	Replicas     int32  `json:"replicas"`
 }
 
-type RunPipelineResponse struct {
-	PipelineID string `json:"pipelineID"`
+type QueryPipelineStatusRequest struct {
+	PipelineRunID string `json:"ID"`
 }
