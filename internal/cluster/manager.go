@@ -14,12 +14,19 @@ type DeploymentConfig struct {
 	Replicas int32
 }
 
+type IngressConfig struct {
+	PrefixMappingPath string
+	ServiceUniquePath string
+}
+
 type Manager interface {
 	// ApplyServiceInternalDNSRecord adds a cname record to DNS center in the cluster
 	// it only functions within the cluster and therefore cannot be accessed externally
 	ApplyServiceInternalDNSRecord(ctx context.Context, service *model.RPCService) error
 	// ApplyServiceDeployment deploys the image with cfg
 	ApplyServiceDeployment(ctx context.Context, cfg *DeploymentConfig) error
+	// ApplyServiceIngress maps prefix to a Service
+	ApplyServiceIngress(ctx context.Context, cfg *IngressConfig) error
 }
 
 type ManagerType uint8

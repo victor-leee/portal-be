@@ -15,6 +15,11 @@ type RPCService struct {
 	UniqueCompletePath string `json:"completePath" gorm:"column:complete_path"`
 	GitRepo            string `json:"gitRepo" gorm:"column:git_repo"`
 	BuildFileRelPath   string `json:"buildFileRelPath" gorm:"column:build_file_rel_path"`
+	Type               string `json:"type" gorm:"column:app_type"`
+	// CustomPort is valid only if Type == config.AppTypeHTTP
+	CustomPort uint8 `json:"customPort" gorm:"column:custom_port"`
+	// PrefixMapping is valid only if Type == config.AppTypeHTTP
+	PrefixMapping string `json:"prefixMapping" gorm:"column:prefix_mapping"`
 }
 
 func (m *RPCService) TableName() string {
