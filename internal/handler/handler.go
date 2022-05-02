@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	config_backend "github.com/victor-leee/portal-be/gen/github.com/victor-leee/config-backend"
 	"github.com/victor-leee/portal-be/internal/cluster"
 	"github.com/victor-leee/portal-be/internal/image"
 	"github.com/victor-leee/portal-be/internal/processor"
 	"github.com/victor-leee/portal-be/internal/processor/pipeline"
 	"github.com/victor-leee/portal-be/internal/repo"
 	"github.com/victor-leee/portal-be/internal/response_error"
+	"github.com/victor-leee/portal-be/internal/rpc"
 	"google.golang.org/protobuf/proto"
 	"net/http"
 )
@@ -118,4 +120,41 @@ func (h *GinHandler) QueryPipelineStatusByID(c *gin.Context) (interface{}, error
 	}
 
 	return pipeline.Query(req.PipelineRunID), nil
+}
+
+func (h *GinHandler) PutConfig(c *gin.Context) (interface{}, error) {
+	var req PutConfigRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+
+	s, err := h.Processor.QueryByID(context.Background(), req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return rpc.ConfigBackendCli.PutConfig(context.Background(), &config_backend.PutConfigRequest{
+		ServiceId:  s.UniqueCompletePath,
+		ServiceKey: s.ServiceKey,
+		Key:        req.Key,
+		Value:      req.Value,
+	})
+}
+
+func (h *GinHandler) GetConfig(c *gin.Context) (interface{}, error) {
+	var req GetConfigRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+
+	s, err := h.Processor.QueryByID(context.Background(), req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return rpc.ConfigBackendCli.GetConfig(context.Background(), &config_backend.GetConfigRequest{
+		ServiceId:  s.UniqueCompletePath,
+		ServiceKey: s.ServiceKey,
+		Key:        req.Key,
+	})
 }

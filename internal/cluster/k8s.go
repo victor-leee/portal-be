@@ -126,6 +126,16 @@ func (k *k8sClusterManager) ApplyServiceDeployment(ctx context.Context, cfg *Dep
 				Image:           proto.String("github.com/victor-leee/side-car:latest"),
 				ImagePullPolicy: (*v14.PullPolicy)(proto.String(string(v14.PullNever))),
 				VolumeMounts:    volumeMounts,
+				Env: []v1.EnvVarApplyConfiguration{
+					{
+						Name:  proto.String("SC_SERVICE_NAME"),
+						Value: proto.String(cfg.Service.Name),
+					},
+					{
+						Name:  proto.String("SC_SERVICE_KEY"),
+						Value: proto.String(cfg.Service.ServiceKey),
+					},
+				},
 			})
 		deploymentApplyCfg.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 		deploymentApplyCfg.Spec.Template.Spec.Volumes = []v1.VolumeApplyConfiguration{
