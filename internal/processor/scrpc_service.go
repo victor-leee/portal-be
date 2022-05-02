@@ -21,6 +21,9 @@ type CreateRPCServiceContext struct {
 	IsService        bool
 	GitRepoURL       string
 	BuildFileRelPath string
+	Type             string
+	CustomPort       uint8
+	PrefixMapping    string
 }
 
 type RPCServiceProcessor interface {
@@ -47,6 +50,9 @@ func (d *DefaultRPCServiceProcessor) Create(ctx *CreateRPCServiceContext) error 
 		ServiceKey:         buildServiceKey(completePath),
 		GitRepo:            ctx.GitRepoURL,
 		BuildFileRelPath:   ctx.BuildFileRelPath,
+		Type:               ctx.Type,
+		CustomPort:         ctx.CustomPort,
+		PrefixMapping:      ctx.PrefixMapping,
 	}
 
 	if err := d.ServiceDao.Insert(ctx, serviceModel); err != nil {

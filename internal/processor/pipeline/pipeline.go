@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"sync"
 	"sync/atomic"
@@ -116,6 +117,7 @@ func (d *defaultPipelineProgressManager) exec(ctx context.Context, uid uuid.UUID
 	case <-done:
 		if errStore.Load() != nil {
 			progress.Store(uid.String(), Failure)
+			logrus.Errorf("ERROR:%v", errStore.Load())
 		}
 	case <-ctx.Done():
 		progress.Store(uid.String(), Failure)

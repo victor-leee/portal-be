@@ -19,7 +19,7 @@ type RPCService struct {
 	// CustomPort is valid only if Type == config.AppTypeHTTP
 	CustomPort uint8 `json:"customPort" gorm:"column:custom_port"`
 	// PrefixMapping is valid only if Type == config.AppTypeHTTP
-	PrefixMapping string `json:"prefixMapping" gorm:"prefix_mapping"`
+	PrefixMapping string `json:"prefixMapping" gorm:"column:prefix_mapping"`
 }
 
 func (m *RPCService) TableName() string {

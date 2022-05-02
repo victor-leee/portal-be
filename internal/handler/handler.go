@@ -34,6 +34,9 @@ func (h *GinHandler) CreateService(c *gin.Context) (interface{}, error) {
 		IsService:        req.IsService,
 		GitRepoURL:       req.GitRepoURL,
 		BuildFileRelPath: req.BuildFileRelPath,
+		Type:             req.Type,
+		CustomPort:       req.CustomPort,
+		PrefixMapping:    req.PrefixMapping,
 	})
 }
 

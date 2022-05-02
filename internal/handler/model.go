@@ -7,6 +7,9 @@ type CreateServiceRequest struct {
 	IsService        bool     `json:"isService"`
 	GitRepoURL       string   `json:"gitRepoURL"`
 	BuildFileRelPath string   `json:"buildFileRelPath"`
+	Type             string   `json:"type"`
+	CustomPort       uint8    `json:"customPort"`
+	PrefixMapping    string   `json:"prefixMapping"`
 }
 
 type QueryByParentIDRequest struct {
