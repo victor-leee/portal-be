@@ -7,6 +7,7 @@ import (
 	"github.com/victor-leee/portal-be/internal/cluster"
 	"github.com/victor-leee/portal-be/internal/image"
 	"github.com/victor-leee/portal-be/internal/processor"
+	"github.com/victor-leee/portal-be/internal/processor/pipeline"
 	"github.com/victor-leee/portal-be/internal/repo"
 	"github.com/victor-leee/portal-be/internal/response_error"
 	"google.golang.org/protobuf/proto"
@@ -74,23 +75,44 @@ func (h *GinHandler) RunPipeLine(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// ----- clone repo
-	baseDir, err := h.RepoProcessor.Clone(s.GitRepo, req.RemoteBranch)
-	if err != nil {
+	var progressErr error
+	var baseDir string
+	var tag *string
+
+	return pipeline.New().
+		Clone(func() error {
+			baseDir, progressErr = h.RepoProcessor.Clone(s.GitRepo, req.RemoteBranch)
+			return progressErr
+		}).
+		Build(func() error {
+			tag, progressErr = h.BuildProcessor.BuildAndPush(baseDir, s.BuildFileRelPath)
+			if progressErr != nil {
+				return progressErr
+			}
+			if tag == nil {
+				return errors.New("empty tag")
+			}
+
+			return nil
+		}).
+		Push(func() error {
+			return nil
+		}).
+		Deploy(func() error {
+			return cluster.GetManager(cluster.K8S).ApplyServiceDeployment(context.Background(), &cluster.DeploymentConfig{
+				Service:  s,
+				Replicas: req.Replicas,
+				ImageTag: *tag,
+			})
+		}).Do(context.Background())
+
+}
+
+func (h *GinHandler) QueryPipelineStatusByID(c *gin.Context) (interface{}, error) {
+	var req QueryPipelineStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
-	// ----- send to docker daemon to build image
-	tag, err := h.BuildProcessor.BuildAndPush(baseDir, s.BuildFileRelPath)
-	if err != nil {
-		return nil, err
-	}
-	if tag == nil {
-		return nil, errors.New("empty tag")
-	}
-	// ----- call k8s apiserver to deploy the image
-	return nil, cluster.GetManager(cluster.K8S).ApplyServiceDeployment(context.Background(), &cluster.DeploymentConfig{
-		Service:  s,
-		Replicas: req.Replicas,
-		ImageTag: *tag,
-	})
+
+	return pipeline.Query(req.PipelineRunID), nil
 }

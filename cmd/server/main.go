@@ -39,6 +39,7 @@ func main() {
 	r.POST("/query-by-parent-id", wrapperHandler(h.QueryByParentID))
 	r.POST("/list-branches", wrapperHandler(h.ListBranches))
 	r.POST("/run-pipeline", wrapperHandler(h.RunPipeLine))
+	r.POST("/pipeline-stage", wrapperHandler(h.QueryPipelineStatusByID))
 	logrus.Fatal(r.Run(":80"))
 }
 

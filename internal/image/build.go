@@ -5,14 +5,12 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/google/uuid"
 	"github.com/victor-leee/portal-be/internal/config"
 	"google.golang.org/protobuf/proto"
-	"strings"
-	"time"
 )
 
 var authCfgBase64Encoded string
@@ -38,8 +36,8 @@ func (d *Docker) BuildAndPush(base, buildFile string) (*string, error) {
 		return nil, err
 	}
 	ctx, _ := archive.TarWithOptions(base, &archive.TarOptions{})
-	randomTag := fmt.Sprintf("%s:%d",
-		strings.ToLower(base64.URLEncoding.EncodeToString([]byte(base+buildFile))), time.Now().UnixMilli())
+	tagUID, _ := uuid.NewUUID()
+	randomTag := tagUID.String()
 	imageBuildResponse, err := cli.ImageBuild(context.Background(),
 		ctx,
 		types.ImageBuildOptions{
