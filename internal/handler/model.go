@@ -29,3 +29,14 @@ type RunPipelineRequest struct {
 type QueryPipelineStatusRequest struct {
 	PipelineRunID string `json:"ID"`
 }
+
+type PutConfigRequest struct {
+	ID    uint64 `json:"id"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type GetConfigRequest struct {
+	ID  uint64 `json:"id"`
+	Key string `json:"key"`
+}

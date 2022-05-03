@@ -8,6 +8,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/victor-leee/scrpc v0.0.0-20220426140636-43e8d68ff575
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	gorm.io/driver/mysql v1.3.3
