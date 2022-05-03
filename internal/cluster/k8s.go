@@ -77,6 +77,12 @@ func (k *k8sClusterManager) ApplyServiceIngress(ctx context.Context, cfg *Ingres
 }
 
 func (k *k8sClusterManager) ApplyServiceDeployment(ctx context.Context, cfg *DeploymentConfig) error {
+	volumeMounts := []v1.VolumeMountApplyConfiguration{
+		{
+			Name:      proto.String("shared-data"),
+			MountPath: proto.String("/tmp"),
+		},
+	}
 	deploymentApplyCfg := &v15.DeploymentApplyConfiguration{
 		TypeMetaApplyConfiguration: v13.TypeMetaApplyConfiguration{
 			Kind:       proto.String("Deployment"),
@@ -100,11 +106,36 @@ func (k *k8sClusterManager) ApplyServiceDeployment(ctx context.Context, cfg *Dep
 					},
 				},
 				Spec: &v1.PodSpecApplyConfiguration{
+					Volumes: []v1.VolumeApplyConfiguration{
+						{
+							Name: proto.String("shared-data"),
+							VolumeSourceApplyConfiguration: v1.VolumeSourceApplyConfiguration{
+								EmptyDir: &v1.EmptyDirVolumeSourceApplyConfiguration{},
+							},
+						},
+					},
 					Containers: []v1.ContainerApplyConfiguration{
 						{
 							Name:            proto.String(cfg.Service.Name),
 							Image:           proto.String(cfg.ImageTag),
+							VolumeMounts:    volumeMounts,
 							ImagePullPolicy: (*v14.PullPolicy)(proto.String(string(v14.PullNever))),
+						},
+						{
+							Name:            proto.String("side-car"),
+							Image:           proto.String("github.com/victor-leee/side-car:latest"),
+							ImagePullPolicy: (*v14.PullPolicy)(proto.String(string(v14.PullNever))),
+							VolumeMounts:    volumeMounts,
+							Env: []v1.EnvVarApplyConfiguration{
+								{
+									Name:  proto.String("SC_SERVICE_NAME"),
+									Value: proto.String(cfg.Service.Name),
+								},
+								{
+									Name:  proto.String("SC_SERVICE_KEY"),
+									Value: proto.String(cfg.Service.ServiceKey),
+								},
+							},
 						},
 					},
 				},
@@ -112,50 +143,14 @@ func (k *k8sClusterManager) ApplyServiceDeployment(ctx context.Context, cfg *Dep
 		},
 	}
 
-	// if it's scrpc app, attach a side-car container and create a volume for the 2 containers
-	if cfg.Service.Type == config.AppTypeSCRPC {
-		volumeMounts := []v1.VolumeMountApplyConfiguration{
-			{
-				Name:      proto.String("shared-data"),
-				MountPath: proto.String("/tmp"),
-			},
-		}
-		deploymentApplyCfg.Spec.Template.Spec.Containers = append(deploymentApplyCfg.Spec.Template.Spec.Containers,
-			v1.ContainerApplyConfiguration{
-				Name:            proto.String("side-car"),
-				Image:           proto.String("github.com/victor-leee/side-car:latest"),
-				ImagePullPolicy: (*v14.PullPolicy)(proto.String(string(v14.PullNever))),
-				VolumeMounts:    volumeMounts,
-				Env: []v1.EnvVarApplyConfiguration{
-					{
-						Name:  proto.String("SC_SERVICE_NAME"),
-						Value: proto.String(cfg.Service.Name),
-					},
-					{
-						Name:  proto.String("SC_SERVICE_KEY"),
-						Value: proto.String(cfg.Service.ServiceKey),
-					},
-				},
-			})
-		deploymentApplyCfg.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
-		deploymentApplyCfg.Spec.Template.Spec.Volumes = []v1.VolumeApplyConfiguration{
-			{
-				Name: proto.String("shared-data"),
-				VolumeSourceApplyConfiguration: v1.VolumeSourceApplyConfiguration{
-					EmptyDir: &v1.EmptyDirVolumeSourceApplyConfiguration{},
-				},
-			},
-		}
-	} else if cfg.Service.Type == config.AppTypeHTTP {
-		// for http app, create an ingress pointing to Service:80
+	// for http app, create an ingress pointing to Service:80
+	if cfg.Service.Type == config.AppTypeHTTP {
 		if err := k.ApplyServiceIngress(ctx, &IngressConfig{
 			ServiceUniquePath: cfg.Service.UniqueCompletePath,
 			PrefixMappingPath: cfg.Service.PrefixMapping,
 		}); err != nil {
 			return err
 		}
-	} else {
-		return fmt.Errorf("invalid service type:%s", cfg.Service.Type)
 	}
 
 	_, err := k.client.AppsV1().Deployments(config.NamespaceDefault).Apply(ctx, deploymentApplyCfg, v12.ApplyOptions{

@@ -12,6 +12,7 @@ import (
 	"github.com/victor-leee/portal-be/internal/repo"
 	"github.com/victor-leee/portal-be/internal/response_error"
 	"net/http"
+	"time"
 )
 
 type CustomHandler func(ctx *gin.Context) (interface{}, error)
@@ -21,6 +22,7 @@ type ResponseMessage struct {
 }
 
 func main() {
+	time.Sleep(3 * time.Second)
 	cfg, err := config.Init()
 	if err != nil {
 		panic(err)
@@ -40,7 +42,9 @@ func main() {
 	r.POST("/list-branches", wrapperHandler(h.ListBranches))
 	r.POST("/run-pipeline", wrapperHandler(h.RunPipeLine))
 	r.POST("/pipeline-stage", wrapperHandler(h.QueryPipelineStatusByID))
-	logrus.Fatal(r.Run(":80"))
+	r.POST("/put-config", wrapperHandler(h.PutConfig))
+	r.POST("/get-config", wrapperHandler(h.GetConfig))
+	logrus.Fatal(r.Run(":8080"))
 }
 
 func wrapperHandler(f CustomHandler) gin.HandlerFunc {
