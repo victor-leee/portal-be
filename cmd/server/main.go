@@ -44,6 +44,7 @@ func main() {
 	r.POST("/pipeline-stage", wrapperHandler(h.QueryPipelineStatusByID))
 	r.POST("/put-config", wrapperHandler(h.PutConfig))
 	r.POST("/get-config", wrapperHandler(h.GetConfig))
+	r.POST("/get-config-keys", wrapperHandler(h.GetConfigKeys))
 	logrus.Fatal(r.Run(":8080"))
 }
 

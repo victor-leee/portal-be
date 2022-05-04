@@ -128,14 +128,9 @@ func (h *GinHandler) PutConfig(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	s, err := h.Processor.QueryByID(context.Background(), req.ID)
-	if err != nil {
-		return nil, err
-	}
-
 	return rpc.ConfigBackendCli.PutConfig(context.Background(), &config_backend.PutConfigRequest{
-		ServiceId:  s.UniqueCompletePath,
-		ServiceKey: s.ServiceKey,
+		ServiceId:  req.ServiceID,
+		ServiceKey: req.ServiceKey,
 		Key:        req.Key,
 		Value:      req.Value,
 	})
@@ -147,14 +142,21 @@ func (h *GinHandler) GetConfig(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	s, err := h.Processor.QueryByID(context.Background(), req.ID)
-	if err != nil {
+	return rpc.ConfigBackendCli.GetConfig(context.Background(), &config_backend.GetConfigRequest{
+		ServiceId:  req.ServiceID,
+		ServiceKey: req.ServiceKey,
+		Key:        req.Key,
+	})
+}
+
+func (h *GinHandler) GetConfigKeys(c *gin.Context) (interface{}, error) {
+	var req GetConfigRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
 
-	return rpc.ConfigBackendCli.GetConfig(context.Background(), &config_backend.GetConfigRequest{
-		ServiceId:  s.UniqueCompletePath,
-		ServiceKey: s.ServiceKey,
-		Key:        req.Key,
+	return rpc.ConfigBackendCli.GetAllKeys(context.Background(), &config_backend.GetAllKeysRequest{
+		ServiceId:  req.ServiceID,
+		ServiceKey: req.ServiceKey,
 	})
 }
