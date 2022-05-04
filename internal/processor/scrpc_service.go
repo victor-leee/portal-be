@@ -22,7 +22,7 @@ type CreateRPCServiceContext struct {
 	GitRepoURL       string
 	BuildFileRelPath string
 	Type             string
-	CustomPort       uint8
+	CustomPort       uint16
 	PrefixMapping    string
 }
 

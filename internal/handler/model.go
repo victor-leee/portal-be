@@ -8,7 +8,7 @@ type CreateServiceRequest struct {
 	GitRepoURL       string   `json:"gitRepoURL"`
 	BuildFileRelPath string   `json:"buildFileRelPath"`
 	Type             string   `json:"type"`
-	CustomPort       uint8    `json:"customPort"`
+	CustomPort       uint16   `json:"customPort"`
 	PrefixMapping    string   `json:"prefixMapping"`
 }
 
