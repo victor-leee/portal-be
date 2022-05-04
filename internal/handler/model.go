@@ -31,12 +31,14 @@ type QueryPipelineStatusRequest struct {
 }
 
 type PutConfigRequest struct {
-	ID    uint64 `json:"id"`
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	ServiceID  string `json:"serviceID"`
+	ServiceKey string `json:"serviceKey"`
+	Key        string `json:"key"`
+	Value      string `json:"value"`
 }
 
 type GetConfigRequest struct {
-	ID  uint64 `json:"id"`
-	Key string `json:"key"`
+	ServiceID  string `json:"serviceID"`
+	ServiceKey string `json:"serviceKey"`
+	Key        string `json:"key"`
 }
