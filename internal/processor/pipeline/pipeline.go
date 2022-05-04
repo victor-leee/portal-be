@@ -22,14 +22,14 @@ type SimpleFuncWithErr func() error
 type ProgressStatus int
 
 const (
-	Init ProgressStatus = iota
+	Unknown ProgressStatus = iota
+	Init
 	Cloning
 	Building
 	Pushing
 	Deploying
 	Success
 	Failure
-	Unknown
 )
 
 var progress = sync.Map{}
