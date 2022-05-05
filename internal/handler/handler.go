@@ -128,12 +128,23 @@ func (h *GinHandler) PutConfig(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return rpc.ConfigBackendCli.PutConfig(context.Background(), &config_backend.PutConfigRequest{
+	resp, err := rpc.ConfigBackendCli.PutConfig(context.Background(), &config_backend.PutConfigRequest{
 		ServiceId:  req.ServiceID,
 		ServiceKey: req.ServiceKey,
 		Key:        req.Key,
 		Value:      req.Value,
 	})
+	if err != nil {
+		return nil, err
+	}
+	if resp.BaseResponse != nil {
+		return &SCRPCBaseResponse{
+			ErrCode: int(resp.BaseResponse.ErrCode),
+			ErrMsg: resp.BaseResponse.ErrMsg,
+		}, nil
+	}
+
+	return &SCRPCBaseResponse{}, nil
 }
 
 func (h *GinHandler) GetConfig(c *gin.Context) (interface{}, error) {
@@ -142,11 +153,27 @@ func (h *GinHandler) GetConfig(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return rpc.ConfigBackendCli.GetConfig(context.Background(), &config_backend.GetConfigRequest{
+	resp, err := rpc.ConfigBackendCli.GetConfig(context.Background(), &config_backend.GetConfigRequest{
 		ServiceId:  req.ServiceID,
 		ServiceKey: req.ServiceKey,
 		Key:        req.Key,
 	})
+	if err != nil {
+		return nil, err
+	}
+	cfgResp := &GetConfigResponse{
+		BaseResponse: &SCRPCBaseResponse{},
+		KeyExist: resp.KeyExist,
+		Value: resp.Value,
+	}
+	if resp.BaseResponse != nil {
+		cfgResp.BaseResponse = &SCRPCBaseResponse{
+			ErrCode: int(resp.BaseResponse.ErrCode),
+			ErrMsg: resp.BaseResponse.ErrMsg,
+		}
+	}
+
+	return cfgResp, nil
 }
 
 func (h *GinHandler) GetConfigKeys(c *gin.Context) (interface{}, error) {
@@ -155,8 +182,24 @@ func (h *GinHandler) GetConfigKeys(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return rpc.ConfigBackendCli.GetAllKeys(context.Background(), &config_backend.GetAllKeysRequest{
+	resp, err := rpc.ConfigBackendCli.GetAllKeys(context.Background(), &config_backend.GetAllKeysRequest{
 		ServiceId:  req.ServiceID,
 		ServiceKey: req.ServiceKey,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	keysResp := &GetConfigKeysResponse{
+		BaseResponse: &SCRPCBaseResponse{},
+		Keys: resp.Keys,
+	}
+	if resp.BaseResponse != nil {
+		keysResp.BaseResponse = &SCRPCBaseResponse{
+			ErrCode: int(resp.BaseResponse.ErrCode),
+			ErrMsg: resp.BaseResponse.ErrMsg,
+		}
+	}
+	
+	return keysResp, nil
 }

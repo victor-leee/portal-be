@@ -42,3 +42,23 @@ type GetConfigRequest struct {
 	ServiceKey string `json:"serviceKey"`
 	Key        string `json:"key"`
 }
+
+type SCRPCBaseResponse struct {
+	ErrCode int    `json:"errCode"`
+	ErrMsg  string `json:"errMsg"`
+}
+
+type GetConfigResponse struct {
+	BaseResponse *SCRPCBaseResponse `json:"baseResponse"`
+	KeyExist     bool               `json:"keyExist"`
+	Value        string             `json:"value"`
+}
+
+type PutConfigResponse struct {
+	BaseResponse *SCRPCBaseResponse `json:"baseResponse"`
+}
+
+type GetConfigKeysResponse struct {
+	BaseResponse *SCRPCBaseResponse `json:"baseResponse"`
+	Keys         []string           `json:"keys"`
+}

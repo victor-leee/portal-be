@@ -2,6 +2,10 @@ package main
 
 import (
 	errors2 "errors"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/victor-leee/portal-be/internal/config"
@@ -11,8 +15,6 @@ import (
 	"github.com/victor-leee/portal-be/internal/processor"
 	"github.com/victor-leee/portal-be/internal/repo"
 	"github.com/victor-leee/portal-be/internal/response_error"
-	"net/http"
-	"time"
 )
 
 type CustomHandler func(ctx *gin.Context) (interface{}, error)
@@ -45,11 +47,19 @@ func main() {
 	r.POST("/put-config", wrapperHandler(h.PutConfig))
 	r.POST("/get-config", wrapperHandler(h.GetConfig))
 	r.POST("/get-config-keys", wrapperHandler(h.GetConfigKeys))
+	r.NoRoute(wrapperHandler(func(ctx *gin.Context) (interface{}, error) { return "HANDLER NOT FOUND", nil }))
 	logrus.Fatal(r.Run(":8080"))
 }
 
 func wrapperHandler(f CustomHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.Header("Access-Control-Allow-Methods", "POST")
+		ctx.Header("Access-Control-Allow-Headers", "Content-Type,Referer")
+		if strings.ToLower(ctx.Request.Method) == "options" {
+			ctx.AbortWithStatus(http.StatusNoContent)
+		}
+
 		message, err := f(ctx)
 		portalErr := &response_error.PortalError{}
 		if err == nil {

@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-// TODO support self-defined port
-
 type DeploymentConfig struct {
 	ImageTag string
 	Service  *model.RPCService
