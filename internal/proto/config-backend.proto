@@ -10,8 +10,8 @@ enum ErrorCode {
 }
 
 message BaseResponse {
-  ErrorCode err_code = 1 [json_name="errCode"];
-  string err_msg = 2 [json_name="errMsg"];
+  ErrorCode err_code = 1;
+  string err_msg = 2;
 }
 
 message GetConfigRequest {
@@ -20,8 +20,8 @@ message GetConfigRequest {
   string key = 3;
 }
 message GetConfigResponse {
-  BaseResponse base_response = 1 [json_name="baseResponse"];
-  bool key_exist = 2 [json_name="keyExist"];
+  BaseResponse base_response = 1;
+  bool key_exist = 2;
   string value = 3;
 }
 
@@ -32,7 +32,7 @@ message PutConfigRequest {
   string value = 4;
 }
 message PutConfigResponse {
-  BaseResponse base_response = 1 [json_name="baseResponse"];
+  BaseResponse base_response = 1;
 }
 
 message GetAllKeysRequest {
@@ -41,7 +41,7 @@ message GetAllKeysRequest {
 }
 
 message GetAllKeysResponse {
-  BaseResponse base_response = 1 [json_name="baseResponse"];
+  BaseResponse base_response = 1;
   repeated string keys = 2;
 }
 

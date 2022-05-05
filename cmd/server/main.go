@@ -58,6 +58,7 @@ func wrapperHandler(f CustomHandler) gin.HandlerFunc {
 		ctx.Header("Access-Control-Allow-Headers", "Content-Type,Referer")
 		if strings.ToLower(ctx.Request.Method) == "options" {
 			ctx.AbortWithStatus(http.StatusNoContent)
+			return
 		}
 
 		message, err := f(ctx)
